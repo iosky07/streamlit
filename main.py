@@ -8,54 +8,13 @@ import math
 from itertools import zip_longest
 from collections import OrderedDict
 from operator import getitem
+import nltk
+from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 
 st.set_page_config(
     page_title= "Jurnatama",
     page_icon="OOO"
 )
-
-with open('custom.css') as source_des:
-    st.markdown("<style>{source_des.read()}</style>", unsafe_allow_html=True)
-
-CSS_LINKS = """<link href="assets/img/favicon.png" rel="icon">
-<link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,600;1,700&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
-<link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-<link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-<link href="assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
-<link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
-<link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
-<link href="assets/vendor/aos/aos.css" rel="stylesheet">
-<link href="assets/css/main.css" rel="stylesheet">
-"""
-
-CSS_TABLE_LISTS = """
-<div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
-            <div class="pricing-item">
-              <h3>Free Plan</h3>
-              <h4><sup>$</sup>0<span> / month</span></h4>
-              <ul>
-                <li><i class="bi bi-check"></i> Quam adipiscing vitae proin</li>
-                <li><i class="bi bi-check"></i> Nec feugiat nisl pretium</li>
-                <li><i class="bi bi-check"></i> Nulla at volutpat diam uteera</li>
-                <li class="na"><i class="bi bi-x"></i> <span>Pharetra massa massa ultricies</span></li>
-                <li class="na"><i class="bi bi-x"></i> <span>Massa ultricies mi quis hendrerit</span></li>
-              </ul>
-              <a href="#" class="buy-btn">Buy Now</a>
-            </div>
-          </div>"""
-
-SEARCH_RESULT = """
-<div>
-<h4>{}</h4>
-<h4>{}</h4>
-<h4>{}</h4>
-<h4>{}</h4>
-<h4>{}</h4>
-</div>
-"""
 
 # st.markdown(CSS_LINKS, unsafe_allow_html=True)
 
@@ -63,22 +22,23 @@ st.markdown("""
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 """, unsafe_allow_html=True)
 
-def card(similarity, title, p_date):
+def card(similarity, title, p_date, download_link):
     return f"""
         <div class="card">
           <h5 style="color:black;" class="card-header">Kemiripan: {similarity}%</h5>
           <div class="card-body">
             <h5 style="color:black;" class="card-title">{title}</h5>
             <p style="color:black;" class="card-text">{p_date}</p>
-            <a style="color:white;" href="#" class="btn btn-primary">Go somewhere</a>
+            <a style="color:white;" href="{download_link}" class="btn btn-primary">Download</a>
           </div>
         </div>
         <br>
     """
 
-st.sidebar.success("Select a page above.")
+# st.sidebar.success("Select a page above.")
 
-df = pd.read_csv('JELIKU-1.csv')
+# df = pd.read_csv('JELIKU-1.csv')
+df = pd.read_excel('datasets/Jurnal Ilmu Hukum UNMUH JEMBER.xlsx', index_col=0)
 df["Abstrak"].fillna("Abstrak tidak tersedia", inplace=True)
 
 #judul to dict
@@ -90,13 +50,13 @@ df["Abstrak"].fillna("Abstrak tidak tersedia", inplace=True)
 # abs = abs.loc[1:79]
 # abs_dict = abs.to_dict()
 
-df = df.loc[1:79]
+df = df.loc[1:100]
 df1 = df.to_dict('index')
 df2 = df.to_dict()
 abs_dict = df2['Abstrak']
 
 # st.write(abs_dict)
-# st.write(df1)
+# st.write(df)
 
 if "my_input" not in st.session_state:
     st.session_state["my_input"] = ""
@@ -104,21 +64,100 @@ if "my_input" not in st.session_state:
 my_input = st.text_input("Input a text here", st.session_state["my_input"])
 submit = st.button("Submit")
 if submit:
+    #PREPROCESSING TEKS INPUTAN
+    hasil = my_input
+    hasil2 = my_input
+
+    # lowercase
+    hasil.lower()
+    hasil2.lower()
+
+    # create stemmer
+    factory = StemmerFactory()
+    stemmer = factory.create_stemmer()
+    stem = stemmer.stem(hasil)
+    stem2 = stemmer.stem(hasil2)
+
+    # tokenizing
+    nltk.download('punkt')
+    tokens = nltk.tokenize.word_tokenize(stem)
+    temp_tokens = nltk.tokenize.word_tokenize(stem2)
+
+    # menghilangkan duplikasi
+    tokens = list(dict.fromkeys(tokens))
+    temp_tokens = list(dict.fromkeys(temp_tokens))
+
+    #list stopword
+    stopwords = ['ada', 'adanya', 'adalah', 'adapun', 'agak', 'agaknya', 'agar', 'akan', 'akankah', 'akhirnya', 'aku',
+                 'akulah', 'amat', 'amatlah', 'anda', 'andalah', 'antar', 'diantaranya', 'antara', 'antaranya',
+                 'diantara', 'apa', 'apaan', 'mengapa', 'apabila', 'apakah', 'apalagi', 'apatah', 'atau', 'ataukah',
+                 'ataupun', 'bagai', 'bagaikan', 'sebagai', 'sebagainya', 'bagaimana', 'bagaimanapun', 'sebagaimana',
+                 'bagaimanakah', 'bagi', 'bahkan', 'bahwa', 'bahwasanya', 'sebaliknya', 'banyak', 'sebanyak',
+                 'beberapa', 'seberapa', 'begini', 'beginian', 'beginikah', 'beginilah', 'sebegini', 'begitu',
+                 'begitukah', 'begitulah', 'begitupun', 'sebegitu', 'belum', 'belumlah', 'sebelum', 'sebelumnya',
+                 'sebenarnya', 'berapa', 'berapakah', 'berapalah', 'berapapun', 'betulkah', 'sebetulnya', 'biasa',
+                 'biasanya', 'bila', 'bilakah', 'bisa', 'bisakah', 'sebisanya', 'boleh', 'bolehkah', 'bolehlah', 'buat',
+                 'bukan', 'bukankah', 'bukanlah', 'bukannya', 'cuma', 'percuma', 'dahulu', 'dalam', 'dan', 'dapat',
+                 'dari', 'daripada', 'dekat', 'demi', 'demikian', 'demikianlah', 'sedemikian', 'dengan', 'depan', 'di',
+                 'dia', 'dialah', 'dini', 'diri', 'dirinya', 'terdiri', 'dong', 'dulu', 'enggak', 'enggaknya', 'entah',
+                 'entahlah', 'terhadap', 'terhadapnya', 'hal', 'hampir', 'hanya', 'hanyalah', 'harus', 'haruslah',
+                 'harusnya', 'seharusnya', 'hendak', 'hendaklah', 'hendaknya', 'hingga', 'sehingga', 'ia', 'ialah',
+                 'ibarat', 'ingin', 'inginkah', 'inginkan', 'ini', 'inikah', 'inilah', 'itu', 'itukah', 'itulah',
+                 'jangan', 'jangankan', 'janganlah', 'jika', 'jikalau', 'juga', 'justru', 'kala', 'kalau', 'kalaulah',
+                 'kalaupun', 'kalian', 'kami', 'kamilah', 'kamu', 'kamulah', 'kan', 'kapan', 'kapankah', 'kapanpun',
+                 'dikarenakan', 'karena', 'karenanya', 'ke', 'kecil', 'kemudian', 'kenapa', 'kepada', 'kepadanya',
+                 'ketika', 'seketika', 'khususnya', 'kini', 'kinilah', 'kiranya', 'sekiranya', 'kita', 'kitalah', 'kok',
+                 'lagi', 'lagian', 'selagi', 'lah', 'lain', 'lainnya', 'melainkan', 'selaku', 'lalu', 'melalui',
+                 'terlalu', 'lama', 'lamanya', 'selama', 'selama', 'selamanya', 'lebih', 'terlebih', 'bermacam',
+                 'macam', 'semacam', 'maka', 'makanya', 'makin', 'malah', 'malahan', 'mampu', 'mampukah', 'mana',
+                 'manakala', 'manalagi', 'masih', 'masihkah', 'semasih', 'masing', 'mau', 'maupun', 'semaunya',
+                 'memang', 'mereka', 'merekalah', 'meski', 'meskipun', 'semula', 'mungkin', 'mungkinkah', 'nah',
+                 'namun', 'nanti', 'nantinya', 'nyaris', 'oleh', 'olehnya', 'seorang', 'seseorang', 'pada', 'padanya',
+                 'padahal', 'paling', 'sepanjang', 'pantas', 'sepantasnya', 'sepantasnyalah', 'para', 'pasti',
+                 'pastilah', 'per', 'pernah', 'pula', 'pun', 'merupakan', 'rupanya', 'serupa', 'saat', 'saatnya',
+                 'sesaat', 'saja', 'sajalah', 'saling', 'bersama', 'sama', 'sesama', 'sambil', 'sampai', 'sana',
+                 'sangat', 'sangatlah', 'saya', 'sayalah', 'se', 'sebab', 'sebabnya', 'sebuah', 'tersebut',
+                 'tersebutlah', 'sedang', 'sedangkan', 'sedikit', 'sedikitnya', 'segala', 'segalanya', 'segera',
+                 'sesegera', 'sejak', 'sejenak', 'sekali', 'sekalian', 'sekalipun', 'sesekali', 'sekaligus', 'sekarang',
+                 'sekarang', 'sekitar', 'sekitarnya', 'sela', 'selain', 'selalu', 'seluruh', 'seluruhnya', 'semakin',
+                 'sementara', 'sempat', 'semua', 'semuanya', 'sendiri', 'sendirinya', 'seolah', 'seperti', 'sepertinya',
+                 'sering', 'seringnya', 'serta', 'siapa', 'siapakah', 'siapapun', 'disini', 'disinilah', 'sini',
+                 'sinilah', 'sesuatu', 'sesuatunya', 'suatu', 'sesudah', 'sesudahnya', 'sudah', 'sudahkah', 'sudahlah',
+                 'supaya', 'tadi', 'tadinya', 'tak', 'tanpa', 'setelah', 'telah', 'tentang', 'tentu', 'tentulah',
+                 'tentunya', 'tertentu', 'seterusnya', 'tapi', 'tetapi', 'setiap', 'tiap', 'setidaknya', 'tidak',
+                 'tidakkah', 'tidaklah', 'toh', 'untuk', 'waduh', 'wah', 'wahai', 'sewaktu', 'walau', 'walaupun',
+                 'wong', 'yaitu', 'yakni', 'yang']
+
+    # filtering/menghilangkan kata tak penting
+    for token in temp_tokens:
+        for stopword in stopwords:
+            if token == stopword:
+                # print(token)
+                tokens.remove(token)
+                break
+
+    # convert to string text
+    abs_result = ' '.join(tokens)
+
+    # duplikasi ke dataframe
+    main_text_result = abs_result
+
     #add to dictionary
-    abs_dict[80] = my_input
+    abs_dict[101] = main_text_result
 
     #tf idf
     tf_idf = TfidfVectorizer(stop_words='english')
     inverted_index = tf_idf.fit_transform(abs_dict.values())
-    text_tfidf_result = pd.DataFrame(inverted_index.toarray(), index=abs_dict.keys(), columns=tf_idf.get_feature_names_out())
+    ttr = pd.DataFrame(inverted_index.toarray(), index=abs_dict.keys(), columns=tf_idf.get_feature_names_out())
+    ttr_2 = pd.DataFrame(inverted_index.toarray(), index=abs_dict.keys(), columns=tf_idf.get_feature_names_out())
 
     #menyimpan hasil tf idf
-    ttr = text_tfidf_result
+    # ttr = text_tfidf_result
 
     #mengambil indeks selain parameter
     col = ttr.columns.values
     row = ttr.index.values
-    row = row[row != 80]
+    row = row[row != 101]
 
     #perhitungan cossim
     sum_d = []
@@ -126,7 +165,7 @@ if submit:
     for a in row:
         temp = 0
         for b in col:
-            ttr[b][a] = ttr[b][a] * ttr[b][80]
+            ttr[b][a] = ttr[b][a] * ttr[b][101]
             temp = temp + ttr[b][a]
         sum_d.append(temp)
 
@@ -134,7 +173,7 @@ if submit:
     # st.write("=========================================================")
     # st.write(ttr_2)
 
-    ttr_2 = pd.read_excel('text_tfidf_result_2.xlsx', index_col=0)
+    # ttr_2 = pd.read_excel('text_tfidf_result_2.xlsx', index_col=0)
 
     #perhitungan cossim tahap 2 (kuadrat)
     col_2 = ttr_2.columns.values
@@ -159,7 +198,7 @@ if submit:
     #perhitungan cossim tahap 4 (terakhir)
     cossim_result = []
 
-    for sum in range(79):
+    for sum in range(100):
         temp = sum_d_akar_kuadrat[sum] * sum_d_akar_kuadrat[3]
         temp1 = sum_d[sum] / temp
         temp1 = round((temp1 * 100), 2)
@@ -186,7 +225,8 @@ if submit:
         p_date = r[1]['Tanggal']
         author = r[1]['Author']
         journal = r[1]['Jurnal']
+        download_link = r[1]['Link Download']
         similarity = r[1]['similarity']
-        st.markdown(card(similarity, title, p_date), unsafe_allow_html=True)
+        st.markdown(card(similarity, title, p_date, download_link), unsafe_allow_html=True)
 
 
