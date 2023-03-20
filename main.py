@@ -26,6 +26,7 @@ def card(similarity, title, p_date, download_link):
     return f"""
         <div class="card">
           <h5 style="color:black;" class="card-header">Kemiripan: {similarity}%</h5>
+          <span class="badge bg-primary">Primary</span>
           <div class="card-body">
             <h5 style="color:black;" class="card-title">{title}</h5>
             <p style="color:black;" class="card-text">{p_date}</p>
@@ -38,7 +39,7 @@ def card(similarity, title, p_date, download_link):
 # st.sidebar.success("Select a page above.")
 
 # df = pd.read_csv('JELIKU-1.csv')
-df = pd.read_excel('datasets/Jurnal Ilmu Hukum UNMUH JEMBER.xlsx', index_col=0)
+df = pd.read_excel('datasets/testing journals.xlsx', index_col=0)
 df["Abstrak"].fillna("Abstrak tidak tersedia", inplace=True)
 
 #judul to dict
