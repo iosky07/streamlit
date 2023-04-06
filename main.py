@@ -258,8 +258,6 @@ if submit:
         temp = sum_d_akar_kuadrat[sum] * sum_d_akar_kuadrat[3]
         temp1 = sum_d[sum] / temp
         temp1 = round((temp1 * 100), 2)
-        # st.write(sum_d[sum])
-
         cossim_result.append(temp1)
 
     #replace hasil ke dictionary lengkap
@@ -299,11 +297,11 @@ if submit:
             km += 1
     # ti = type(df1)
 
-    st.write("Total Artikel Teknologi Informasi : {}" .format(ti))
-    st.write("Total Artikel Ilmu Geografi       : {}" .format(ig))
-    st.write("Total Artikel Ilmu Kimia          : {}" .format(ik))
-    st.write("Total Artikel Ilmu Hukum          : {}" .format(ih))
-    st.write("Total Artikel Kesehatan Masyarakat: {}" .format(km))
+    # st.write("Total Artikel Teknologi Informasi : {}" .format(ti))
+    # st.write("Total Artikel Ilmu Geografi       : {}" .format(ig))
+    # st.write("Total Artikel Ilmu Kimia          : {}" .format(ik))
+    # st.write("Total Artikel Ilmu Hukum          : {}" .format(ih))
+    # st.write("Total Artikel Kesehatan Masyarakat: {}" .format(km))
 
     st.write("Hasil perhitungan Cosine Similarity: ")
 
