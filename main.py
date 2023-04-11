@@ -13,18 +13,27 @@ from collections import OrderedDict
 from operator import getitem
 import nltk
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
+from streamlit_option_menu import option_menu
+from streamlit_extras.switch_page_button import switch_page
 
 st.set_page_config(
-    page_title= "Jurnatama",
-    page_icon="OOO"
+    page_title="Simi",
+    page_icon="🧊",
 )
 
+# selected = 'Home'
+selected = option_menu("Main Menu", ['Home', 'Crawling', 'About'], icons=['house', 'list-columns-reverse', 'person'], menu_icon='cast', default_index=0, orientation='horizontal')
+
 # st.markdown(CSS_LINKS, unsafe_allow_html=True)
+
+if selected == 'Crawling':
+    switch_page('crawling page')
+elif selected == 'About':
+    switch_page('about page')
 
 st.markdown("""
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 """, unsafe_allow_html=True)
-
 def card(similarity, title, p_date, download_link, number):
     return f"""
         <div class="card">
@@ -41,30 +50,17 @@ def card(similarity, title, p_date, download_link, number):
 
 # st.sidebar.success("Select a page above.")
 
-# df = pd.read_csv('JELIKU-1.csv')
 df = pd.read_excel('datasets/testing journals.xlsx', index_col=0)
 df["Abstrak"].fillna("Abstrak tidak tersedia", inplace=True)
-
-#judul to dict
-# jud = df['Judul']
-# jud = dict(jud)
-
-#abstrak to dict
-# abs = df['Abstrak']
-# abs = abs.loc[1:79]
-# abs_dict = abs.to_dict()
 
 df1 = df.to_dict('index')
 df2 = df.to_dict()
 abs_dict = df2['Abstrak']
 
-# st.write(abs_dict)
-# st.write(df)
-
 if "my_input" not in st.session_state:
     st.session_state["my_input"] = ""
 
-my_input = st.text_input("Input a text here", st.session_state["my_input"])
+my_input = st.text_input("Masukkan teks abstrak", st.session_state["my_input"])
 submit = st.button("Submit")
 if submit:
     #PREPROCESSING TEKS INPUTAN
@@ -82,8 +78,6 @@ if submit:
     stem2 = stemmer.stem(hasil2)
 
     # tokenizing
-    # st.write("Tahap 1")
-    # nltk.download('punkt')
     tokens = nltk.tokenize.word_tokenize(stem)
     temp_tokens = nltk.tokenize.word_tokenize(stem2)
 
@@ -136,7 +130,6 @@ if submit:
     for token in temp_tokens:
         for stopword in stopwords:
             if token == stopword:
-                # print(token)
                 tokens.remove(token)
                 break
 
@@ -147,58 +140,15 @@ if submit:
     main_text_result = abs_result
 
     #add to dictionary
-    # st.write("abs_dict type = {}".format(type(abs_dict)))
-    # st.write("len abs_dict = {}".format(len(abs_dict)))
     abs_dict[501] = main_text_result
-    # st.write("len abs_dict now = {}".format(len(abs_dict)))
-    # st.write("len(df2)+1 = {}".format(len(df2)+1))
 
     #tf idf
-    # st.write("Tahap 2")
     tf_idf = TfidfVectorizer(stop_words='english')
     inverted_index = tf_idf.fit_transform(abs_dict.values())
-    # inverted_index_result = tf_idf.fit_transform(abs_dict[501])
     ttr = pd.DataFrame(inverted_index.toarray(), index=abs_dict.keys(), columns=tf_idf.get_feature_names_out())
     ttr_2 = pd.DataFrame(inverted_index.toarray(), index=abs_dict.keys(), columns=tf_idf.get_feature_names_out())
 
-    # st.write("cek")
-    # with io.BytesIO() as buffer:
-    #     # Write array to buffer
-    #     np.savetxt(buffer, ttr, delimiter=",")
-    #     st.download_button(
-    #         label="Download array as CSV",
-    #         data=buffer,  # Download buffer
-    #         file_name='array.csv',
-    #         mime='text/csv'
-    #     )
-
-    # st.write("BENTUK DF {}" .format(ttr))
-    # st.write("BENTUK DF Result {}" .format(ttr.iloc[[140]]))
-
-    #menyimpan hasil tf idf
-    # ttr = text_tfidf_result
-
-    # col1 = ttr.columns
-    # row1 = ttr.index
-    # st.write("C1 {}".format(col1))
-    # st.write("R1 {}".format(row1))
-
-    #mengambil indeks selain parameter
-    # col = ttr.columns.values
-    # row = ttr.index.values
-    # row = row[row != 501]
-    # st.write("Tipe data col {}" .format(type(col)))
-    # st.write("Tipe data row {}".format(type(row)))
-    #
-    # st.write("BENTUK COL {}" .format(col))
-    # st.write("BENTUK ROW {}" .format(row))
-
     #perhitungan cossim
-    # st.write("Tahap 3")
-    # st.write("C {}" .format(col))
-    # st.write("R {}".format(row))
-    # sum_d = []
-
     #PENTING!!!
     temp = ttr.iloc[0: 499]
     temp = temp.to_numpy()
@@ -206,40 +156,10 @@ if submit:
     tempp = tempp.to_numpy()
     temp = ttr * tempp
     sum_d = temp.sum(axis=1)
-    # st.write("SUM D {}".format(sum_d))
 
-    # for a in row:
-    #     temp = 0
-    #     st.write("ROW {}" .format(a))
-        # for b in col:
-        #     st.write("COL {}".format(b))
-        #     ttr[b][a] = ttr[b][a] * ttr[b][501]
-        #     temp = temp + ttr[b][a]
-        # sum_d.append(temp)
-
-    # st.write(ttr)
-    # st.write("=========================================================")
-    # st.write(ttr_2)
-
-    # ttr_2 = pd.read_excel('text_tfidf_result_2.xlsx', index_col=0)
-
-    # st.write("BERHASILLLLLLL")
-    #perhitungan cossim tahap 2 (kuadrat)
-    # col_2 = ttr_2.columns.values
-    # row_2 = ttr_2.index.values
-
-    # sum_d_kuadrat = []
-
+    # perhitungan cossim tahap 2 (kuadrat)
     temp_2 = ttr_2 * ttr_2
     sum_d_kuadrat = temp_2.sum(axis=1)
-    # for a in row_2:
-    #     temp = 0
-    #     for b in col_2:
-    #         ttr_2[b][a] = ttr_2[b][a] * ttr_2[b][a]
-    #         temp = temp + ttr_2[b][a]
-    #     sum_d_kuadrat.append(temp)
-
-    # st.write("BERHASILLLLLLL 22222222222")
 
     #perhitungan cossim tahap 3 (akar kuadrat)
     sum_d_akar_kuadrat = []
@@ -248,10 +168,6 @@ if submit:
         akar = math.sqrt(a)
         sum_d_akar_kuadrat.append(akar)
 
-    # st.write("KUADRRAT {}" .format(sum_d_kuadrat))
-    # st.write("AKAR KUADRRAT {}" .format(sum_d_akar_kuadrat))
-    #perhitungan cossim tahap 4 (terakhir)
-    # st.write("Tahap 4")
     cossim_result = []
 
     for sum in range(500):
@@ -263,18 +179,12 @@ if submit:
     #replace hasil ke dictionary lengkap
     temp2 = 0
     df_rep = dict(itertools.islice(df1.items(), 500))
-    # st.write(cossim_result)
     for cossim in cossim_result:
-        # st.write(cossim)
         df_rep[temp2]['similarity'] = cossim
         temp2+=1
 
-    # st.write(len(cossim_result))
-    # st.write(df_rep)
-    #sorting dari nilai kemiripan tertinggi
     res = sorted(df_rep.items(), key=lambda x: x[1]['similarity'], reverse=True)
     res = res[:100]
-    # st.write(res)
 
     #menghitung frekuensi munculnya jenis artikel ilmiah
     ti = 0
@@ -295,7 +205,6 @@ if submit:
             ih += 1
         else:
             km += 1
-    # ti = type(df1)
 
     # st.write("Total Artikel Teknologi Informasi : {}" .format(ti))
     # st.write("Total Artikel Ilmu Geografi       : {}" .format(ig))
@@ -305,11 +214,8 @@ if submit:
 
     st.write("Hasil perhitungan Cosine Similarity: ")
 
-
-    # st.write(res)
     number = 0
     for r in res:
-        # st.markdown(CSS_TABLE_LISTS, unsafe_allow_html=True)
         number += 1
         title = r[1]['Judul']
         abstract = r[1]['Abstrak']
