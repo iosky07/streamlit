@@ -9,3 +9,4 @@ scikit-learn
 nltk
 Sastrawi
 streamlit_option_menu
+protobuf~=3.19.0
