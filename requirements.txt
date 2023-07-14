@@ -9,3 +9,4 @@ scikit-learn
 nltk
 Sastrawi
 streamlit_option_menu
+session_state
