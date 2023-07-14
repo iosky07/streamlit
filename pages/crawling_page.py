@@ -1,3 +1,5 @@
+import os
+
 import streamlit as st
 from streamlit_option_menu import option_menu
 from streamlit_extras.switch_page_button import switch_page
@@ -25,6 +27,11 @@ elif selected == 'Home':
 
 if "my_input" not in st.session_state:
     st.session_state["my_input"] = ""
+
+def save_file(file):
+    with open(os.path.join("tempDir", file),"wb") as f:
+        f.write(file.getBuffer())
+    return
 
 def crawling(journal_link):
     my_bar = st.progress(0, text=progress_text)
@@ -106,13 +113,11 @@ def crawling(journal_link):
                 temp += 1
             else:
                 temp = 1
-        # print(i)
 
         # set up crawling halaman selanjutnya
         response = url.urlopen('{}?page={}'.format(journal_link, temp_page))
         page = bs4.BeautifulSoup(response)
-        # print(temp_page)
-        # print(page)
+
         temp_page += 1
         my_bar.progress(temp_page + 1, text=progress_text)
     return [t_list, a_list, d_list, au_list, jn_list, dl_list, journal, my_bar];
@@ -197,6 +202,10 @@ if result_c == 'Crawling Semua Data':
                         )
 
                     my_bar.progress(100, text=progress_text_2)
+
+                    # df.to_excel(os.path.join('datasets', "new.xlsx"))
+                    df.to_excel(os.path.join('tempDir', "new.xlsx"))
+
                     st.success('Crawling data telah berhasil!', icon="✅")
 
         # except:
@@ -218,7 +227,7 @@ else:
                 l_2 = l_2 + i
 
         if l_2 == "https://garuda.kemdikbud.go.id/journal/view/":
-            try:
+            # try:
                 progress_text = "Proses Crawling data. Mohon Tunggu."
                 progress_text_2 = "Selesai."
 
@@ -257,9 +266,14 @@ else:
                     )
 
                 my_bar.progress(100, text=progress_text_2)
+
+                # df.to_excel(os.path.join('datasets', "new.xlsx"))
+                df.to_excel(os.path.join('tempDir', "new.xlsx"))
+
                 st.success('Crawling data telah berhasil!', icon="✅")
-            except:
-                st.error('Terjadi kesalahan dalam memuat halaman website tujuan (coba periksa data input)', icon="🚨")
+
+            # except:
+            #     st.error('Terjadi kesalahan dalam memuat halaman website tujuan (coba periksa data input)', icon="🚨")
         else:
             st.error('Data input kosong atau link yang anda masukkan salah', icon="🚨")
 

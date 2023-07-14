@@ -38,10 +38,9 @@ def card(similarity, title, p_date, download_link, number):
     return f"""
         <div class="card">
           <h5 style="color:black;" class="card-header">Kemiripan: {similarity}%</h5>
-          <p style="color:black;" class="card-header">{number}</p>
+          <h5 style="color:black;" class="card-header">{title}</h5>
           <div class="card-body">
-            <h5 style="color:black;" class="card-title">{title}</h5>
-            <p style="color:black;" class="card-text">{p_date}</p>
+            <p style="color:black;" class="card-text">{abstract[0:300]}....</p>
             <a style="color:white;" href="{download_link}" class="btn btn-primary">Download</a>
           </div>
         </div>
@@ -184,7 +183,7 @@ if submit:
         temp2+=1
 
     res = sorted(df_rep.items(), key=lambda x: x[1]['similarity'], reverse=True)
-    res = res[:100]
+    res = list(filter(lambda c: c[1]['similarity'] > 5, res))
 
     #menghitung frekuensi munculnya jenis artikel ilmiah
     ti = 0
@@ -206,12 +205,45 @@ if submit:
         else:
             km += 1
 
+    #Perhitungan nilai uji
+    act_doc = 100
+    # st.write(res[0][1]["Tipe"])
+
+    if res[0][1]["Tipe"] == "Ilmu Hukum":
+        prec = ih / (ih + (ig + ik + ti + km))
+        rec = ih / act_doc
+        f1 = (2 * prec * rec) / (prec + rec)
+
+    elif res[0][1]["Tipe"] == "Teknologi Informasi":
+        prec = ti / (ti + (ig + ik + ih + km))
+        rec = ti / act_doc
+        f1 = (2 * prec * rec) / (prec + rec)
+
+    elif res[0][1]["Tipe"] == "Ilmu Kimia":
+        prec = ik / (ik + (ig + km + ih + ti))
+        rec = ik / act_doc
+        f1 = (2 * prec * rec) / (prec + rec)
+
+    elif res[0][1]["Tipe"] == "Ilmu Geografi":
+        prec = ig / (ig + (km + ik + ih + ti))
+        rec = ig / act_doc
+        f1 = (2 * prec * rec) / (prec + rec)
+
+    else:
+        prec = km / (km + (ig + ik + ih + ti))
+        rec = km / act_doc
+        f1 = (2 * prec * rec) / (prec + rec)
+
+    prec = round(prec * 100, 2)
+    rec = round(rec * 100, 2)
+    f1 = round(f1 * 100, 2)
+    st.write("Precision {}%, Recall {}%, dan F1 Score {}%" .format(prec, rec, f1))
+
     # st.write("Total Artikel Teknologi Informasi : {}" .format(ti))
     # st.write("Total Artikel Ilmu Geografi       : {}" .format(ig))
     # st.write("Total Artikel Ilmu Kimia          : {}" .format(ik))
     # st.write("Total Artikel Ilmu Hukum          : {}" .format(ih))
     # st.write("Total Artikel Kesehatan Masyarakat: {}" .format(km))
-
     st.write("Hasil perhitungan Cosine Similarity: ")
 
     number = 0

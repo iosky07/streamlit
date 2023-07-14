@@ -18,41 +18,18 @@ if selected == 'Crawling':
 elif selected == 'Home':
     switch_page('main')
 
-import time
+st.write()
 
-if "my_input" not in st.session_state:
-    st.session_state["my_input"] = ""
+st.markdown("""
+<style>
+.big-font {
+    font-size:50px !important;
+}
+.med-font {
+    font-size:20px !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
-with st.form('crawling form'):
-    choice = st.text_input('Masukkan Link Jurnal Garuda', st.session_state["my_input"])
-    submit = st.form_submit_button('Submit')
-
-if submit:
-    progress_text = "Proses Crawling data. Mohon Tunggu."
-    progress_text_2 = "Selesai."
-    my_bar = st.progress(0, text=progress_text)
-    for percent_complete in range(100):
-        time.sleep(0.1)
-        my_bar.progress(percent_complete + 1, text=progress_text)
-    my_bar.progress(percent_complete + 1, text=progress_text_2)
-
-    st.success('Crawling data telah berhasil!', icon="✅")
-
-    df1 = pd.read_excel('datasets/testing journals.xlsx', index_col=0)
-
-    buffer = io.BytesIO()
-
-    # Create a Pandas Excel writer using XlsxWriter as the engine.
-    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-        # Write each dataframe to a different worksheet.
-        df1.to_excel(writer, sheet_name='Sheet1')
-
-        # Close the Pandas Excel writer and output the Excel file to the buffer
-        writer.save()
-
-        st.download_button(
-            label="Download Excel worksheets",
-            data=buffer,
-            file_name="download_test.xlsx",
-            mime="application/vnd.ms-excel"
-        )
+st.markdown('<p class="big-font">Simi</p>', unsafe_allow_html=True)
+st.markdown('<p class="med-font; text-align: justify;">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>', unsafe_allow_html=True)
