@@ -8,3 +8,4 @@ joblib==0.16.0
 scikit-learn
 nltk
 Sastrawi
+streamlit_option_menu
