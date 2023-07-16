@@ -12,6 +12,7 @@ from itertools import zip_longest
 from collections import OrderedDict
 from operator import getitem
 import nltk
+nltk.download('punkt')
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from streamlit_option_menu import option_menu
 from streamlit_extras.switch_page_button import switch_page
